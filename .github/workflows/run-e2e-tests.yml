@@ -1,0 +1,33 @@
+name: Run E2E Tests
+
+on: [pull_request]
+
+jobs:
+  run-units-tests:
+    name: Run E2E Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: bitnami/postgresql
+        ports:
+          - 5432:5432
+        environment:
+          - POSTGRESQL_USERNAME=docker
+          - POSTGRESQL_PASSWORD=docker
+          - POSTGRESQL_DATABASE=apifastify
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: 'npm'
+
+      - run: npm ci
+
+      - run: npm run test:e2e
+        env:
+          JWT_SECRET: a3f6h83kdm0vna034f6g7h8j9k20lmg7
+          DATABASE_URL: "postgresql://docker:docker@localhost:5432/apifastify?schema=public"
